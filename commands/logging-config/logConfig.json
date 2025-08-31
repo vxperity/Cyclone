@@ -1,0 +1,43 @@
+{
+  "default": {
+    "channelId": null,
+    "enabledEvents": [
+      "messageDelete",
+      "messageBulkDelete",
+      "messageEdit",
+      "channelCreate",
+      "channelDelete",
+      "channelUpdate",
+      "nicknameChange",
+      "memberRoleUpdate"
+    ]
+  },
+  "guilds": {
+    "1297774341391519744": {
+      "channelId": "1298046322234101850",
+      "enabledEvents": [
+        "messageDelete",
+        "messageBulkDelete",
+        "messageEdit",
+        "channelCreate",
+        "channelDelete",
+        "channelUpdate",
+        "nicknameChange",
+        "memberRoleUpdate"
+      ]
+    },
+    "1332574713913806872": {
+      "channelId": null,
+      "enabledEvents": [
+        "messageDelete",
+        "messageBulkDelete",
+        "messageEdit",
+        "channelCreate",
+        "channelDelete",
+        "channelUpdate",
+        "nicknameChange",
+        "memberRoleUpdate"
+      ]
+    }
+  }
+}
