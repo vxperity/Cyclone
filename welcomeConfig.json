@@ -1,0 +1,17 @@
+{
+    "1297774341391519744": {
+        "message": "Welcome {mention} to {server}! Below is how many members we have!",
+        "channelId": "1298450328609620088",
+        "linkUrl": "https://discord.com/channels/1297774341391519744/1297777269271560265",
+        "buttonLabel": "Info",
+        "memberCountLabel": "{member}",
+        "roleId": "1297777918587572285"
+    },
+    "1332574713913806872": {
+        "message": "yo {user-mention}",
+        "channelId": "1332574714744275008",
+        "roleId": "1402084207982940200",
+        "linkUrl": "https://www.roblox.com/home",
+        "memberCountLabel": "Members: {member-count}"
+    }
+}
