@@ -17,7 +17,6 @@ const path = require('path');
 
 const configPath = path.join(__dirname, 'erlcConfig.json');
 
-// Default configuration structure
 const defaultConfig = {
     guilds: {}
 };
@@ -52,9 +51,9 @@ const defaultGuildConfig = {
             buttons: [
                 {
                     label: "Join Server",
-                    style: "Link", // or "Primary", "Secondary", "Success", "Danger"
-                    action: "link", // "link", "variable", or "none"
-                    value: "{join-key}" // replaced at runtime
+                    style: "Link", 
+                    action: "link", 
+                    value: "{join-key}" 
                 }
             ]
         },
@@ -135,7 +134,7 @@ const defaultGuildConfig = {
 };
 
 
-// Configuration management
+
 async function loadConfig() {
     try {
         const data = await fs.readFile(configPath, 'utf8');
@@ -168,7 +167,7 @@ async function saveGuildConfig(guildId, guildConfig) {
     await saveConfig(config);
 }
 
-// API functions
+
 async function getServerStatus(apiKey) {
     try {
         const response = await fetch('https://api.policeroleplay.community/v1/server', {
@@ -232,9 +231,9 @@ async function executeServerCommand(apiKey, command) {
     }
 }
 
-// Utility functions
+
 function replaceVariables(text, serverData, playersData = []) {
-    // Fix: Check if text is a string, if not, return empty string or convert to string
+    
     if (!text || typeof text !== 'string') {
         return '';
     }
@@ -249,14 +248,14 @@ function replaceVariables(text, serverData, playersData = []) {
         .replace(/{verification}/g, serverData?.AccVerifiedReq || 'N/A')
         .replace(/{utilization}/g, Math.round(((serverData?.CurrentPlayers || 0) / (serverData?.MaxPlayers || 1)) * 100).toString() || '0');
 
-    // Handle co-owners
+
     if (serverData?.CoOwnerIds && serverData.CoOwnerIds.length > 0) {
         result = result.replace(/{co-owners}/g, serverData.CoOwnerIds.join(', '));
     } else {
         result = result.replace(/{co-owners}/g, 'None');
     }
 
-    // Handle online players
+
     if (playersData && playersData.length > 0) {
         const playerList = playersData
             .slice(0, 10)
@@ -287,7 +286,7 @@ function hasPermission(member, allowedRoles) {
     return member.roles.cache.some(role => allowedRoles.includes(role.id));
 }
 
-// Auto boost functionality
+
 async function checkAutoBoost(client) {
     try {
         const config = await loadConfig();
@@ -323,14 +322,14 @@ async function checkAutoBoost(client) {
                     await webhookClient.send({
                         content: content,
                         embeds: [embed]
-                        // Removed username and avatarURL - let webhook use its own settings
+                        
                     });
                     
                     console.log(`Auto boost triggered via webhook for guild ${guildId}`);
                     continue;
                 } catch (error) {
                     console.error('Error sending auto boost via webhook:', error);
-                    // Fall through to regular channel send
+                    
                 }
             }
             
@@ -372,7 +371,7 @@ async function checkAutoBoost(client) {
     }
 }
 
-// Create embed from configuration
+
 function createEmbedFromConfig(embedConfig, serverData, playersData = []) {
     const embed = new EmbedBuilder()
         .setTitle(replaceVariables(embedConfig.title, serverData, playersData) || 'Server Status')
@@ -399,7 +398,7 @@ function createEmbedFromConfig(embedConfig, serverData, playersData = []) {
         });
     }
 
-    // ---- Build buttons ----
+   
     let actionRows = [];
     if (embedConfig.buttons && embedConfig.buttons.length > 0) {
         const builtButtons = embedConfig.buttons.map(btn => {
@@ -427,7 +426,7 @@ function createEmbedFromConfig(embedConfig, serverData, playersData = []) {
                 .setStyle(style);
         });
 
-        // Split into rows of max 5 buttons
+        
         for (let i = 0; i < builtButtons.length; i += 5) {
             actionRows.push(new ActionRowBuilder().addComponents(builtButtons.slice(i, i + 5)));
         }
@@ -436,9 +435,9 @@ function createEmbedFromConfig(embedConfig, serverData, playersData = []) {
     return { embed, actionRows };
 }
 
-// Send embed via webhook or regular channel
+
 async function sendEmbed(interaction, embedConfig, serverData, playersData, pingRoles, commandType) {
-    // createEmbedFromConfig now returns { embed, actionRows }
+    
     const { embed, actionRows } = createEmbedFromConfig(embedConfig, serverData, playersData);
 
     let pingMessage = '';
@@ -457,7 +456,7 @@ async function sendEmbed(interaction, embedConfig, serverData, playersData, ping
         components: actionRows || []
     };
 
-    // Use webhook if configured
+    
     if (embedConfig.webhook) {
         try {
             const webhookClient = new WebhookClient({ url: embedConfig.webhook });
@@ -465,19 +464,19 @@ async function sendEmbed(interaction, embedConfig, serverData, playersData, ping
             return { success: true, method: 'webhook' };
         } catch (error) {
             console.error('Error sending via webhook:', error);
-            // fall back to channel send
+        
         }
     }
 
-    // Regular channel send
+    
     const message = await interaction.editReply(payload);
 
     return { success: true, method: 'channel', message };
 }
 
-// Commands
+
 const commands = [
-    // ERLC Config Command
+    
     {
         data: new SlashCommandBuilder()
             .setName('erlc-config')
@@ -524,7 +523,7 @@ const commands = [
         }
     },
 
-    // SSU Command
+    
     {
         data: new SlashCommandBuilder()
             .setName('ssu')
@@ -566,7 +565,7 @@ const commands = [
 
             const embedConfig = config.embedsConfig.ssu;
             
-            // Send the embed
+            
             const result = await sendEmbed(interaction, embedConfig, serverData, [], config.ssuRoles, 'ssu');
             
             if (!result.success) {
@@ -575,7 +574,6 @@ const commands = [
                 });
             }
 
-            // Auto-update player count every 15 seconds if sent to channel
             if (result.method === 'channel') {
                 const updateInterval = setInterval(async () => {
                     try {
@@ -592,17 +590,17 @@ const commands = [
                         console.error('Error updating SSU embed:', error);
                         clearInterval(updateInterval);
                     }
-                }, 15000); // 15 seconds
+                }, 15000); 
 
-                // Stop updating after 10 minutes
+                
                 setTimeout(() => {
                     clearInterval(updateInterval);
-                }, 600000); // 10 minutes
+                }, 600000); 
             }
         }
     },
 
-    // Boost Command
+   
     {
         data: new SlashCommandBuilder()
             .setName('boost')
@@ -644,7 +642,7 @@ const commands = [
 
             const embedConfig = config.embedsConfig.boost;
             
-            // Send the embed
+            
             const result = await sendEmbed(interaction, embedConfig, serverData, [], config.boostRoles, 'boost');
             
             if (!result.success) {
@@ -653,7 +651,7 @@ const commands = [
                 });
             }
 
-            // Auto-update player count every 15 seconds if sent to channel
+            
             if (result.method === 'channel') {
                 const updateInterval = setInterval(async () => {
                     try {
@@ -670,17 +668,17 @@ const commands = [
                         console.error('Error updating Boost embed:', error);
                         clearInterval(updateInterval);
                     }
-                }, 15000); // 15 seconds
+                }, 15000); 
 
-                // Stop updating after 10 minutes
+                
                 setTimeout(() => {
                     clearInterval(updateInterval);
-                }, 600000); // 10 minutes
+                }, 600000); 
             }
         }
     },
 
-    // Command Executor
+    
     {
         data: new SlashCommandBuilder()
             .setName('command')
@@ -779,7 +777,7 @@ const commands = [
         }
     },
 
-    // Status Command
+    
     {
         data: new SlashCommandBuilder()
             .setName('erlc-status')
@@ -817,7 +815,7 @@ const commands = [
 
             const embedConfig = config.embedsConfig.status;
             
-            // Send the embed
+            
             const result = await sendEmbed(interaction, embedConfig, serverData, playersData, [], 'status');
             
             if (!result.success) {
@@ -829,11 +827,11 @@ const commands = [
     }
 ];
 
-// Event handler for interactions
+
 function handleInteractions(client) {
     client.on('interactionCreate', async (interaction) => {
         try {
-            // Handle select menus
+            
             if (interaction.isStringSelectMenu()) {
                 if (interaction.customId === 'erlc_config_main') {
                     const config = await getGuildConfig(interaction.guildId);
@@ -856,7 +854,7 @@ function handleInteractions(client) {
                 }
             }
             
-            // Handle role select menus
+            
             else if (interaction.isRoleSelectMenu()) {
                 const config = await getGuildConfig(interaction.guildId);
                 
@@ -884,7 +882,7 @@ function handleInteractions(client) {
                 }
             }
             
-            // Handle modals
+            
             else if (interaction.isModalSubmit()) {
                 if (interaction.customId === 'erlc_api_config') {
                     await handleAPIModalSubmit(interaction);
@@ -897,7 +895,7 @@ function handleInteractions(client) {
                 }
             }
             
-            // Handle buttons
+            
             else if (interaction.isButton()) {
                 if (interaction.customId.startsWith('erlc_json_')) {
                     const embedType = interaction.customId.replace('erlc_json_', '');
@@ -922,7 +920,7 @@ function handleInteractions(client) {
     });
 }
 
-// Interaction handlers
+
 async function handleAPIConfig(interaction, config) {
     const modal = new ModalBuilder()
         .setCustomId('erlc_api_config')
@@ -1375,13 +1373,13 @@ async function handleCommandsConfig(interaction, config) {
 async function handleCommandToggle(interaction, selectedCommands) {
     const config = await getGuildConfig(interaction.guildId);
     
-    // Reset all commands to false first
+    
     config.commands.ssu = false;
     config.commands.boost = false;
     config.commands.command = false;
     config.commands.status = false;
     
-    // Enable selected commands
+    
     selectedCommands.forEach(cmd => {
         config.commands[cmd] = true;
     });
@@ -1401,20 +1399,20 @@ async function handleCommandToggle(interaction, selectedCommands) {
     await interaction.reply({ embeds: [embed], ephemeral: true });
 }
 
-// Initialize the ERLC system
+
 function initializeERLC(client) {
-    // Handle interactions
+    
     handleInteractions(client);
     
-    // Start auto boost checker
+    r
     setInterval(() => {
         checkAutoBoost(client);
-    }, 5 * 60 * 1000); // Check every 5 minutes
+    }, 5 * 60 * 1000); 
     
     console.log('✅ ERLC system initialized');
 }
 
-// Export all commands and the initialization function
+
 module.exports = [
     ...commands,
     initializeERLC
