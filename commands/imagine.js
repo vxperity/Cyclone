@@ -2,7 +2,7 @@ require('dotenv').config();
 const { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const axios = require('axios');
 
-// Stability API client
+
 const stability = axios.create({
   baseURL: 'https://api.stability.ai',
   headers: {
@@ -12,7 +12,7 @@ const stability = axios.create({
   }
 });
 
-// Fetch available engines and pick the first picture-type one
+
 async function getDefaultEngine() {
   const res = await stability.get('/v1/engines/list');
   const engines = res.data;
@@ -21,14 +21,10 @@ async function getDefaultEngine() {
   return pictureEngine.id;
 }
 
-/**
- * Generate one image via Stability AI and return base64 PNG.
- * If engine is SDXL, always use 1024×1024.
- */
 async function generateImage(prompt) {
   const engine = await getDefaultEngine();
 
-  // Always pick 1024×1024 for SDXL
+  
   let width = 512;
   let height = 512;
   if (engine.includes('xl')) {
@@ -90,3 +86,4 @@ module.exports = {
     }
   }
 };
+
